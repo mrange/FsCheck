@@ -295,3 +295,11 @@ module Gen =
         |> Gen.sample 1 10
         |> Seq.forall ((=) 100) 
         |> Assert.True
+
+    [<Fact>]
+    let ``Sequence does not blow up the stack``() =
+        let longSeq = [ for i in 1..1000000 -> Gen.constant i] |> Gen.sequence
+        let samples = longSeq |> Gen.sample 100 10 
+        samples
+        |> Seq.concat
+        |> Seq.iter (fun s -> Assert.InRange(s, 1, 1000000))
